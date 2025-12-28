@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PromptLord Settings</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button:hover { background-color: #1d4ed8; }
+        .status { margin-top: 10px; font-size: 14px; }
+        .success { color: #059669; }
+        .info {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>PromptLord Settings</h1>
+    <div class="card">
+        <label for="apiKey">OpenAI API Key</label>
+        <input type="text" id="apiKey" placeholder="sk-..." />
+        
+        <button id="save">Save Key</button>
+        <div id="status" class="status"></div>
+
+        <div class="info">
+            <p><strong>Free Trial:</strong> Without a key, you get 10 free enhancements per IP.</p>
+            <p><strong>Unlimited:</strong> Add your own key to bypass limits and use the extension directly with OpenAI.</p>
+            <p>Your key is stored locally in your browser and never sent to our servers.</p>
+        </div>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

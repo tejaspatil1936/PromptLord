@@ -327,37 +327,58 @@ class PromptEnhancer {
      * @param {string} text 
      * @returns {Promise<string>}
      */
+    /**
+     * Calls the API to enhance the text.
+     * Supports BYOK (Bring Your Own Key) and Free Trial via Backend.
+     * @param {string} text 
+     * @returns {Promise<string>}
+     */
+    /**
+     * Calls the API to enhance the text via the Background Script.
+     * @param {string} text 
+     * @returns {Promise<string>}
+     */
     async callApi(text) {
-        const apiKey = window.PromptLordConfig?.apiKey;
+        return new Promise((resolve, reject) => {
+            // Check for orphaned script (Extension reloaded but page not refreshed)
+            if (!chrome.runtime?.id || !chrome.storage) {
+                alert("PromptLord: Extension updated. Please refresh this page to continue.");
+                reject(new Error("EXTENSION_CONTEXT_INVALIDATED"));
+                return;
+            }
 
-        if (!apiKey) {
-            throw new Error("API Key not configured");
-        }
+            // Check for user's stored API key first
+            chrome.storage.local.get(['apiKey'], (result) => {
+                const userKey = result.apiKey;
+                const mode = userKey ? "BYOK" : "FREE";
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are an expert prompt engineer. Rewrite the user's prompt to be more precise, detailed, and effective. Return ONLY the rewritten prompt, no explanations."
-                    },
-                    { role: "user", content: text }
-                ]
-            })
+                console.log(`PromptLord: Sending request to background (Mode: ${mode})`);
+
+                chrome.runtime.sendMessage({
+                    action: "enhance_prompt",
+                    text: text,
+                    mode: mode,
+                    apiKey: userKey
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Runtime Error:", chrome.runtime.lastError);
+                        reject(new Error(chrome.runtime.lastError.message));
+                        return;
+                    }
+
+                    if (response && response.success) {
+                        resolve(response.enhancedText);
+                    } else {
+                        if (response && response.error === "FREE_LIMIT_REACHED") {
+                            alert("PromptLord: Free trial limit reached (10 requests). Please add your own OpenAI API Key in the extension settings to continue.");
+                            reject(new Error("FREE_LIMIT_REACHED"));
+                        } else {
+                            reject(new Error(response ? response.error : "Unknown Error"));
+                        }
+                    }
+                });
+            });
         });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content;
     }
 }
 
