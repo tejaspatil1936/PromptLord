@@ -6,16 +6,14 @@ class PromptEnhancer {
         this.selectors = {
             sendButtons: [
                 'button[data-testid="send-button"]', // ChatGPT
-                'button[aria-label="Send message"]', // Claude, Gemini
-                'button[aria-label="Submit"]', // Perplexity
+                'button[aria-label="Send message" i]', // Claude, Gemini
+                'button[aria-label="Submit" i]', // Perplexity
+                'button[aria-label="Ask" i]', // Perplexity alternative
+                'button[aria-label="Send" i]', // Generic
                 "textarea + button", // Generic fallback
                 'div[role="textbox"] ~ button', // Generic fallback
             ],
-            inputs: [
-                "textarea",
-                "[contenteditable='true']",
-                "div[role='textbox']"
-            ],
+            // Inputs are now handled via priority logic in findInput
         };
 
         this.observer = null;
@@ -35,8 +33,12 @@ class PromptEnhancer {
      * Starts the MutationObserver to handle dynamic content changes.
      */
     startObserver() {
+        let timeout;
         this.observer = new MutationObserver(() => {
-            this.injectButtons();
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                this.injectButtons();
+            }, 500); // Increased debounce to 500ms for React stability
         });
 
         this.observer.observe(document.body, {
@@ -138,6 +140,7 @@ class PromptEnhancer {
      * @param {HTMLButtonElement} btn 
      */
     async enhancePrompt(btn) {
+        console.log("PromptLord: enhancePrompt started");
         const sendBtn = btn.nextElementSibling;
         const input = this.findInput(sendBtn);
 
@@ -146,21 +149,87 @@ class PromptEnhancer {
             return;
         }
 
-        const currentText = input.value || input.innerText || "";
-        if (!currentText.trim()) return;
+        const currentText = this.readInputText(input);
+        console.log("PromptLord: Current text", currentText);
+
+        if (!currentText || !currentText.trim()) {
+            console.log("PromptLord: Empty text, skipping");
+            // Debug: Log innerHTML to see what's actually there
+            console.log("PromptLord: Input innerHTML:", input.innerHTML);
+            return;
+        }
 
         const enhancedText = await this.callApi(currentText);
+        console.log("PromptLord: API response received", enhancedText);
         this.updateInput(input, enhancedText);
     }
 
     /**
+     * Reads text from the input, handling various DOM structures.
+     * @param {HTMLElement} input 
+     * @returns {string}
+     */
+    readInputText(input) {
+        console.log("PromptLord: Reading input", input.tagName, input.className);
+
+        if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
+            return input.value;
+        }
+
+        // For contenteditable divs (ChatGPT, Claude, etc.)
+        // ChatGPT often puts text in <p> tags inside the div
+        if (input.getAttribute("contenteditable") === "true") {
+            // Check for child paragraphs first (common in rich text editors)
+            const paragraphs = input.querySelectorAll("p");
+            if (paragraphs.length > 0) {
+                return Array.from(paragraphs).map(p => p.innerText).join("\n");
+            }
+            return input.innerText || input.textContent;
+        }
+
+        return input.innerText || "";
+    }
+
+    /**
      * Finds the input element associated with the send button.
+     * Uses a Priority Proximity Search to find the most specific input.
      * @param {HTMLElement} sendBtn 
      * @returns {HTMLElement|null}
      */
     findInput(sendBtn) {
-        const parent = sendBtn.closest("form") || document.body;
-        return parent.querySelector(this.selectors.inputs.join(","));
+        // Strategy: Go up the tree level by level and look for inputs with priority.
+        // Priority: textarea > contenteditable > role=textbox
+
+        let current = sendBtn.parentElement;
+        const maxLevels = 5;
+
+        for (let i = 0; i < maxLevels && current; i++) {
+            // Priority 1: Textarea (Perplexity, ChatGPT fallback)
+            let input = current.querySelector("textarea");
+            if (input) {
+                console.log(`PromptLord: Found textarea at level ${i}`, input);
+                return input;
+            }
+
+            // Priority 2: ContentEditable (Claude, Gemini)
+            input = current.querySelector("[contenteditable='true']");
+            if (input) {
+                console.log(`PromptLord: Found contenteditable at level ${i}`, input);
+                return input;
+            }
+
+            // Priority 3: Generic Role (Fallback)
+            // Only accept if it doesn't contain the above (which we already checked)
+            input = current.querySelector("div[role='textbox']");
+            if (input) {
+                console.log(`PromptLord: Found role=textbox at level ${i}`, input);
+                return input;
+            }
+
+            current = current.parentElement;
+        }
+
+        return null;
     }
 
     /**
@@ -169,26 +238,81 @@ class PromptEnhancer {
      * @param {string} text 
      */
     updateInput(input, text) {
+        console.log("PromptLord: Updating input", input);
         input.focus();
+        input.click(); // Ensure it's active
 
+        // Strategy 1: execCommand (Universal - works for Textarea AND ContentEditable)
+        // This is the most "native" way to insert text
+        if (document.queryCommandSupported('insertText')) {
+            // Try to select all text first
+            try {
+                if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
+                    input.select();
+                } else if (input.getAttribute("contenteditable") === "true") {
+                    const range = document.createRange();
+                    range.selectNodeContents(input);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            } catch (e) {
+                console.warn("PromptLord: Selection failed", e);
+            }
+
+            const success = document.execCommand("insertText", false, text);
+            if (success) {
+                console.log("PromptLord: execCommand success");
+                // Dispatch input event just in case
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                return;
+            }
+        }
+
+        // Strategy 2: React Value Setter (Fallback for Textarea/Input)
         if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
             const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(
                 window.HTMLTextAreaElement.prototype,
                 "value"
             ).set;
             nativeTextAreaValueSetter.call(input, text);
+
+            // Dispatch standard events
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+
+            // Dispatch advanced events for stubborn frameworks (Claude)
+            const events = [
+                new InputEvent('beforeinput', { bubbles: true, inputType: 'insertText', data: text }),
+                new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }),
+                new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })
+            ];
+            events.forEach(evt => input.dispatchEvent(evt));
+
+            console.log("PromptLord: React setter success with advanced events");
+            return;
+        }
+
+        // Strategy 3: Advanced Event Simulation (Fallback for ContentEditable)
+        console.log("PromptLord: Trying advanced event simulation fallback");
+
+        if (input.id === "prompt-textarea") { // ChatGPT
+            input.innerHTML = `<p>${text}</p>`;
         } else {
             input.innerText = text;
         }
 
-        input.dispatchEvent(new Event("input", { bubbles: true }));
+        const events = [
+            new InputEvent('beforeinput', { bubbles: true, inputType: 'insertText', data: text }),
+            new Event('input', { bubbles: true }),
+            new Event('change', { bubbles: true }),
+            new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }),
+            new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })
+        ];
+
+        events.forEach(evt => input.dispatchEvent(evt));
     }
 
-    /**
-     * Calls the OpenAI API to enhance the text.
-     * @param {string} text 
-     * @returns {Promise<string>}
-     */
     /**
      * Calls the OpenAI API to enhance the text.
      * @param {string} text 
