@@ -51,6 +51,7 @@ class PromptEnhancer {
      * Injects the Enhance button next to detected send buttons.
      */
     injectButtons() {
+        if (window.location.hostname.includes("perplexity")) return;
         const sendButtons = document.querySelectorAll(this.selectors.sendButtons.join(","));
 
         sendButtons.forEach((sendBtn) => {
@@ -198,32 +199,38 @@ class PromptEnhancer {
      */
     findInput(sendBtn) {
         // Strategy: Go up the tree level by level and look for inputs with priority.
-        // Priority: textarea > contenteditable > role=textbox
+        // Priority: Visible textarea > Visible contenteditable > Visible role=textbox
 
         let current = sendBtn.parentElement;
         const maxLevels = 5;
 
         for (let i = 0; i < maxLevels && current; i++) {
-            // Priority 1: Textarea (Perplexity, ChatGPT fallback)
-            let input = current.querySelector("textarea");
-            if (input) {
-                console.log(`PromptLord: Found textarea at level ${i}`, input);
-                return input;
+            // Priority 1: Visible Textarea
+            const textareas = current.querySelectorAll("textarea");
+            for (const textarea of textareas) {
+                // Check if visible (offsetParent is null if display:none)
+                if (textarea.offsetParent !== null) {
+                    console.log(`PromptLord: Found visible textarea at level ${i}`, textarea);
+                    return textarea;
+                }
             }
 
-            // Priority 2: ContentEditable (Claude, Gemini)
-            input = current.querySelector("[contenteditable='true']");
-            if (input) {
-                console.log(`PromptLord: Found contenteditable at level ${i}`, input);
-                return input;
+            // Priority 2: Visible ContentEditable
+            const editables = current.querySelectorAll("[contenteditable='true']");
+            for (const editable of editables) {
+                if (editable.offsetParent !== null) {
+                    console.log(`PromptLord: Found visible contenteditable at level ${i}`, editable);
+                    return editable;
+                }
             }
 
-            // Priority 3: Generic Role (Fallback)
-            // Only accept if it doesn't contain the above (which we already checked)
-            input = current.querySelector("div[role='textbox']");
-            if (input) {
-                console.log(`PromptLord: Found role=textbox at level ${i}`, input);
-                return input;
+            // Priority 3: Visible Role=textbox
+            const roleTextboxes = current.querySelectorAll("div[role='textbox']");
+            for (const textbox of roleTextboxes) {
+                if (textbox.offsetParent !== null) {
+                    console.log(`PromptLord: Found visible role=textbox at level ${i}`, textbox);
+                    return textbox;
+                }
             }
 
             current = current.parentElement;
@@ -231,6 +238,8 @@ class PromptEnhancer {
 
         return null;
     }
+
+
 
     /**
      * Updates the input value and triggers input events.
