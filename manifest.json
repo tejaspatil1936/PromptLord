@@ -14,7 +14,7 @@
     "service_worker": "src/background.js"
   },
   "host_permissions": [
-    "http://localhost:3000/*",
+    "https://promptlord.onrender.com/*",
     "https://api.openai.com/*"
   ],
   "content_scripts": [
@@ -27,7 +27,6 @@
         "https://grok.com/*"
       ],
       "js": [
-        "src/config.js",
         "src/content/index.js"
       ],
       "css": [
