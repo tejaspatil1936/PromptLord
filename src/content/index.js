@@ -150,7 +150,6 @@ class PromptEnhancer {
      * @param {HTMLButtonElement} btn 
      */
     async enhancePrompt(btn) {
-        console.log("PromptLord: enhancePrompt started");
         const sendBtn = btn.nextElementSibling;
         const input = this.findInput(sendBtn);
 
@@ -160,17 +159,12 @@ class PromptEnhancer {
         }
 
         const currentText = this.readInputText(input);
-        console.log("PromptLord: Current text", currentText);
 
         if (!currentText || !currentText.trim()) {
-            console.log("PromptLord: Empty text, skipping");
-            // Debug: Log innerHTML to see what's actually there
-            console.log("PromptLord: Input innerHTML:", input.innerHTML);
             return;
         }
 
         const enhancedText = await this.callApi(currentText);
-        console.log("PromptLord: API response received", enhancedText);
         this.updateInput(input, enhancedText);
     }
 
@@ -180,7 +174,6 @@ class PromptEnhancer {
      * @returns {string}
      */
     readInputText(input) {
-        console.log("PromptLord: Reading input", input.tagName, input.className);
 
         if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
             return input.value;
@@ -217,9 +210,7 @@ class PromptEnhancer {
             // Priority 1: Visible Textarea
             const textareas = current.querySelectorAll("textarea");
             for (const textarea of textareas) {
-                // Check if visible (offsetParent is null if display:none)
                 if (textarea.offsetParent !== null) {
-                    console.log(`PromptLord: Found visible textarea at level ${i}`, textarea);
                     return textarea;
                 }
             }
@@ -228,7 +219,6 @@ class PromptEnhancer {
             const editables = current.querySelectorAll("[contenteditable='true']");
             for (const editable of editables) {
                 if (editable.offsetParent !== null) {
-                    console.log(`PromptLord: Found visible contenteditable at level ${i}`, editable);
                     return editable;
                 }
             }
@@ -237,7 +227,6 @@ class PromptEnhancer {
             const roleTextboxes = current.querySelectorAll("div[role='textbox']");
             for (const textbox of roleTextboxes) {
                 if (textbox.offsetParent !== null) {
-                    console.log(`PromptLord: Found visible role=textbox at level ${i}`, textbox);
                     return textbox;
                 }
             }
@@ -256,7 +245,6 @@ class PromptEnhancer {
      * @param {string} text 
      */
     updateInput(input, text) {
-        console.log("PromptLord: Updating input", input);
         input.focus();
         input.click(); // Ensure it's active
 
@@ -280,8 +268,6 @@ class PromptEnhancer {
 
             const success = document.execCommand("insertText", false, text);
             if (success) {
-                console.log("PromptLord: execCommand success");
-                // Dispatch input event just in case
                 input.dispatchEvent(new Event("input", { bubbles: true }));
                 return;
             }
@@ -306,13 +292,10 @@ class PromptEnhancer {
                 new KeyboardEvent('keyup', { bubbles: true, key: 'Enter' })
             ];
             events.forEach(evt => input.dispatchEvent(evt));
-
-            console.log("PromptLord: React setter success with advanced events");
             return;
         }
 
         // Strategy 3: Advanced Event Simulation (Fallback for ContentEditable)
-        console.log("PromptLord: Trying advanced event simulation fallback");
 
         if (input.id === "prompt-textarea") { // ChatGPT
             input.innerHTML = `<p>${text}</p>`;
@@ -360,8 +343,6 @@ class PromptEnhancer {
             chrome.storage.local.get(['apiKey'], (result) => {
                 const userKey = result.apiKey;
                 const mode = userKey ? "BYOK" : "FREE";
-
-                console.log(`PromptLord: Sending request to background (Mode: ${mode})`);
 
                 chrome.runtime.sendMessage({
                     action: "enhance_prompt",
