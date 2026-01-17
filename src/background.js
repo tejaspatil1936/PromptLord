@@ -90,7 +90,7 @@ REMEMBER: You are a PROMPT REWRITER, not an answerer. Transform the request, don
 
         } else {
             // --- FREE TRIAL MODE (Production Backend) ---
-            response = await fetch("https://promptlord.onrender.com/enhance", {
+            response = await fetch("https://promptlord-36ja.onrender.com/enhance", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
