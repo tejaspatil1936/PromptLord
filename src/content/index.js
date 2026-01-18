@@ -3,6 +3,9 @@
  */
 class PromptEnhancer {
     constructor() {
+        this.usageCount = 0;
+        this.maxFreeUsage = 10;
+        this.loadUsageCount();
         this.selectors = {
             sendButtons: [
                 'button[data-testid="send-button"]', // ChatGPT
@@ -18,7 +21,32 @@ class PromptEnhancer {
 
         this.observer = null;
         this.lastClickTime = 0;
+        this.isColdStart = true;
         this.init();
+    }
+
+    /**
+     * Load usage count from storage
+     */
+    async loadUsageCount() {
+        try {
+            const result = await chrome.storage.local.get(['freeTrialUsage']);
+            this.usageCount = result.freeTrialUsage || 0;
+        } catch (err) {
+            this.usageCount = 0;
+        }
+    }
+
+    /**
+     * Increment and save usage count
+     */
+    async incrementUsage() {
+        this.usageCount++;
+        try {
+            await chrome.storage.local.set({ freeTrialUsage: this.usageCount });
+        } catch (err) {
+            console.error('Failed to save usage count:', err);
+        }
     }
 
     /**
@@ -79,10 +107,38 @@ class PromptEnhancer {
     createButton() {
         const btn = document.createElement("button");
         btn.className = "ai-enhance-button";
-        btn.textContent = "Enhance";
         btn.type = "button";
         btn.addEventListener("click", (e) => this.handleClick(e, btn));
+
+        // Set initial button text with usage counter for free trial
+        this.updateButtonText(btn);
+
         return btn;
+    }
+
+    /**
+     * Update button text with usage counter
+     */
+    async updateButtonText(btn) {
+        try {
+            const result = await chrome.storage.local.get(['apiKey', 'freeTrialUsage']);
+            const isFree = !result.apiKey;
+            const usage = result.freeTrialUsage || 0;
+
+            if (isFree && usage < this.maxFreeUsage) {
+                const remaining = this.maxFreeUsage - usage;
+                btn.textContent = `Enhance (${remaining} left)`;
+                btn.title = `${remaining} free enhancements remaining. Add API key for unlimited use.`;
+            } else if (isFree) {
+                btn.textContent = "Enhance";
+                btn.title = "Free trial limit reached. Add your OpenAI API key for unlimited use.";
+            } else {
+                btn.textContent = "Enhance";
+                btn.title = "Enhance your prompt with AI";
+            }
+        } catch (err) {
+            btn.textContent = "Enhance";
+        }
     }
 
     /**
@@ -118,18 +174,55 @@ class PromptEnhancer {
 
         this.lastClickTime = now;
         const originalText = btn.textContent;
+
+        // Check if using free trial and show intelligent loading message
+        chrome.storage.local.get(['apiKey'], async (result) => {
+            const isFree = !result.apiKey;
+
+            if (isFree && this.isColdStart) {
+                this.setButtonState(btn, "Waking server...", true, "wait");
+                this.isColdStart = false;
+            } else {
+                this.setButtonState(btn, "Enhancing...", true, "wait");
+            }
+        });
+
         this.setButtonState(btn, "Enhancing...", true, "wait");
 
         try {
             await this.enhancePrompt(btn);
+
+            // Track usage for free trial users
+            chrome.storage.local.get(['apiKey'], async (result) => {
+                if (!result.apiKey) {
+                    await this.incrementUsage();
+                    await this.updateButtonText(btn);
+                }
+            });
         } catch (err) {
             console.error("PromptLord: Enhance failed", err);
-            btn.textContent = "Error";
-        } finally {
-            setTimeout(() => {
-                this.setButtonState(btn, "Enhance", false, "");
-            }, 1000);
+
+            // Show user-friendly error messages
+            if (err.message && err.message.includes('FREE_LIMIT_REACHED')) {
+                btn.textContent = "Limit reached";
+                setTimeout(() => {
+                    if (confirm('Free trial limit reached (10/10 used). Add your OpenAI API key in settings for unlimited use.\n\nOpen settings now?')) {
+                        chrome.runtime.sendMessage({ action: 'open_options' });
+                    }
+                    this.setButtonState(btn, "Enhance", false, "");
+                }, 100);
+            } else {
+                btn.textContent = "Error";
+                setTimeout(() => {
+                    this.setButtonState(btn, "Enhance", false, "");
+                }, 2000);
+            }
+            return;
         }
+
+        setTimeout(() => {
+            this.setButtonState(btn, "Enhance", false, "");
+        }, 1000);
     }
 
     /**

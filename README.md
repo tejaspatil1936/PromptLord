@@ -4,7 +4,7 @@ A browser extension that adds an AI-powered "Enhance" button to your favorite ch
 
 ## Features
 
-- **Universal Support**: Works on ChatGPT, Claude, Gemini, Perplexity, and Grok.
+- **Universal Support**: Works on ChatGPT, Claude, Gemini.
 - **Premium UI**: Native-feeling glassmorphism design.
 - **Smart Injection**: Automatically detects input fields and injects the button.
 - **Dark Mode**: Fully supports light and dark themes.

@@ -12,6 +12,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleEnhanceRequest(request, sendResponse);
         return true; // Will respond asynchronously
     }
+
+    if (request.action === "open_options") {
+        chrome.runtime.openOptionsPage();
+        return false;
+    }
 });
 
 async function handleEnhanceRequest(request, sendResponse) {
@@ -117,3 +122,22 @@ REMEMBER: You are a PROMPT REWRITER, not an answerer. Transform the request, don
         sendResponse({ success: false, error: error.message });
     }
 }
+
+// Keep-alive ping to prevent Render free tier from sleeping
+// Pings every 14 minutes (under the 15-minute sleep threshold)
+const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+
+function keepAlive() {
+    fetch("https://promptlord-36ja.onrender.com/enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "ping" })
+    })
+        .then(() => console.log('Keep-alive ping sent'))
+        .catch(() => { }); // Ignore errors
+}
+
+// Start keep-alive pings
+setInterval(keepAlive, KEEP_ALIVE_INTERVAL);
+// Send initial ping after 1 minute to warm up the server
+setTimeout(keepAlive, 60000);
