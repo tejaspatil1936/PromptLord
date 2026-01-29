@@ -95,7 +95,7 @@ REMEMBER: You are a PROMPT REWRITER, not an answerer. Transform the request, don
 
         } else {
             // --- FREE TRIAL MODE (Production Backend) ---
-            response = await fetch("https://promptlord.onrender.com/enhance", {
+            response = await fetch("https://promptlord-2kjz.onrender.com/enhance", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -128,7 +128,7 @@ REMEMBER: You are a PROMPT REWRITER, not an answerer. Transform the request, don
 const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
 
 function keepAlive() {
-    fetch("https://promptlord.onrender.com/enhance", {
+    fetch("https://promptlord-2kjz.onrender.com/enhance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: "ping" })
