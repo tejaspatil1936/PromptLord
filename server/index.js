@@ -51,9 +51,10 @@ const FREE_LIMIT = 50; // Reduced from 100 for better security
 const RATE_WINDOW_MS = 60000; // 1 minute
 const MIN_REQUEST_INTERVAL_MS = 2000; // Minimum 2 seconds between requests
 
-// Multiple Gemini API Keys (supports comma-separated keys)
-const GEMINI_API_KEYS = process.env.GEMINI_API_KEYS
-    ? process.env.GEMINI_API_KEYS.split(',').map(key => key.trim()).filter(key => key.length > 0)
+// Multiple Groq API Keys (supports comma-separated keys)
+// Groq is 10x faster than Gemini (500 tokens/sec vs 50 tokens/sec)
+const GROQ_API_KEYS = process.env.GROQ_API_KEYS
+    ? process.env.GROQ_API_KEYS.split(',').map(key => key.trim()).filter(key => key.length > 0)
     : [];
 
 // Round-robin index for API key rotation
@@ -63,11 +64,12 @@ let currentKeyIndex = 0;
 const failedKeys = new Map(); // keyIndex -> { failCount, lastFailTime }
 const KEY_COOLDOWN_MS = 60000; // 1 minute cooldown for failed keys
 
-if (GEMINI_API_KEYS.length === 0) {
-    console.error("❌ Error: GEMINI_API_KEYS is not set in .env file");
-    console.log("💡 Add multiple keys like: GEMINI_API_KEYS=key1,key2,key3");
+if (GROQ_API_KEYS.length === 0) {
+    console.error("❌ Error: GROQ_API_KEYS is not set in .env file");
+    console.log("💡 Add multiple keys like: GROQ_API_KEYS=key1,key2,key3");
+    console.log("💡 Get free keys at: https://console.groq.com");
 } else {
-    console.log(`✅ Loaded ${GEMINI_API_KEYS.length} Gemini API key(s)`);
+    console.log(`✅ Loaded ${GROQ_API_KEYS.length} Groq API key(s)`);
 }
 
 /**
@@ -77,8 +79,8 @@ function getNextApiKey() {
     const now = Date.now();
     let attempts = 0;
 
-    while (attempts < GEMINI_API_KEYS.length) {
-        const keyIndex = currentKeyIndex % GEMINI_API_KEYS.length;
+    while (attempts < GROQ_API_KEYS.length) {
+        const keyIndex = currentKeyIndex % GROQ_API_KEYS.length;
         currentKeyIndex++;
 
         // Check if this key is in cooldown
@@ -93,12 +95,12 @@ function getNextApiKey() {
             }
         }
 
-        return { key: GEMINI_API_KEYS[keyIndex], index: keyIndex };
+        return { key: GROQ_API_KEYS[keyIndex], index: keyIndex };
     }
 
     // All keys are in cooldown, use the first one anyway
     console.warn("⚠️  All API keys are in cooldown, using fallback");
-    return { key: GEMINI_API_KEYS[0], index: 0 };
+    return { key: GROQ_API_KEYS[0], index: 0 };
 }
 
 /**
@@ -167,31 +169,27 @@ app.post('/enhance', async (req, res) => {
 
     // Try with multiple API keys if needed
     let lastError = null;
-    for (let attempt = 0; attempt < Math.min(3, GEMINI_API_KEYS.length); attempt++) {
+    for (let attempt = 0; attempt < Math.min(3, GROQ_API_KEYS.length); attempt++) {
         const { key: apiKey, index: keyIndex } = getNextApiKey();
 
         try {
+            // Groq uses OpenAI-compatible API
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+                "https://api.groq.com/openai/v1/chat/completions",
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `Transform this rough prompt into a clear, comprehensive, well-structured prompt. Return ONLY the improved prompt.
-
-Original: ${prompt}
-
-Enhanced:`
-                            }]
+                        model: "llama-3.1-8b-instant",  // Fastest Groq model (500+ tokens/sec)
+                        messages: [{
+                            role: "user",
+                            content: `Transform this rough prompt into a clear, comprehensive, well-structured prompt. Return ONLY the improved prompt.\n\nOriginal: ${prompt}\n\nEnhanced:`
                         }],
-                        generationConfig: {
-                            temperature: 0.3,  // Lower = faster & more deterministic
-                            maxOutputTokens: 2048
-                        }
+                        temperature: 0.3,
+                        max_tokens: 2048
                     })
                 }
             );
@@ -199,7 +197,7 @@ Enhanced:`
             if (!response.ok) {
                 const errorData = await response.json();
                 // Security: Don't log API keys or sensitive data
-                console.error(`❌ Gemini API Error (Key #${keyIndex + 1}):`, {
+                console.error(`❌ Groq API Error (Key #${keyIndex + 1}):`, {
                     status: response.status,
                     error: errorData.error?.message || 'Unknown error'
                 });
@@ -215,13 +213,13 @@ Enhanced:`
 
             const data = await response.json();
 
-            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                console.error("Invalid response structure from Gemini API");
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                console.error("Invalid response structure from Groq API");
                 lastError = { error: "Invalid API response" };
                 continue;
             }
 
-            const enhancedPrompt = data.candidates[0].content.parts[0].text;
+            const enhancedPrompt = data.choices[0].message.content;
 
             console.log(`✅ Request successful with API Key #${keyIndex + 1}`);
             return res.json({ enhancedPrompt });
@@ -248,8 +246,10 @@ Enhanced:`
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
-        totalKeys: GEMINI_API_KEYS.length,
-        activeKeys: GEMINI_API_KEYS.length - failedKeys.size,
+        provider: 'Groq',
+        model: 'llama-3.1-8b-instant',
+        totalKeys: GROQ_API_KEYS.length,
+        activeKeys: GROQ_API_KEYS.length - failedKeys.size,
         failedKeys: Array.from(failedKeys.entries()).map(([index, info]) => ({
             keyIndex: index + 1,
             failCount: info.failCount,
@@ -278,6 +278,8 @@ setInterval(() => {
 
 app.listen(PORT, () => {
     console.log(`🚀 PromptLord Backend running on http://localhost:${PORT}`);
-    console.log(`📊 Using ${GEMINI_API_KEYS.length} Gemini API key(s) with round-robin rotation`);
+    console.log(`⚡ Using ${GROQ_API_KEYS.length} Groq API key(s) with round-robin rotation`);
     console.log(`🔒 Security: CORS enabled, Rate limiting active (${FREE_LIMIT} req/hour per IP)`);
+    console.log(`🚀 Model: llama-3.1-8b-instant (500+ tokens/sec)`);
 });
+
