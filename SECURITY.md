@@ -4,7 +4,7 @@
 
 Your PromptLord backend is now **highly secure** with multiple layers of protection. API keys are **NEVER** exposed to the frontend, browser dev tools, or logs.
 
-![Security Architecture Diagram](/home/tejas/.gemini/antigravity/brain/5666d310-3dde-4036-ae10-0bd2fce42b1e/security_architecture_diagram_1769575129738.png)
+
 
 ---
 
@@ -28,7 +28,7 @@ Your PromptLord backend is now **highly secure** with multiple layers of protect
            │ API Calls with keys
            ▼
 ┌─────────────────────┐
-│  Gemini API         │
+│  Groq API           │
 └─────────────────────┘
 ```
 
@@ -157,8 +157,8 @@ https://evil.com → ❌ BLOCKED + Warning logged
 
 ```javascript
 // DON'T DO THIS (Frontend code)
-const API_KEY = "AIzaSy...";  // ❌ Exposed in browser
-fetch("https://api.gemini.com", {
+const API_KEY = "gsk_...";  // ❌ Exposed in browser
+fetch("https://api.groq.com", {
     headers: { "Authorization": `Bearer ${API_KEY}` }  // ❌ Visible in Network tab
 });
 ```
@@ -173,9 +173,9 @@ fetch("https://your-backend.com/enhance", {
 });
 
 // Backend (Server) - KEYS STORED HERE
-const GEMINI_API_KEYS = process.env.GEMINI_API_KEYS;  // ✅ From .env
-fetch("https://api.gemini.com", {
-    headers: { "Authorization": `Bearer ${GEMINI_API_KEYS[0]}` }  // ✅ Keys stay server-side
+const GROQ_API_KEYS = process.env.GROQ_API_KEYS;  // ✅ From .env
+fetch("https://api.groq.com", {
+    headers: { "Authorization": `Bearer ${GROQ_API_KEYS[0]}` }  // ✅ Keys stay server-side
 });
 ```
 
@@ -243,7 +243,7 @@ curl -X POST http://localhost:3000/enhance \
 When deploying to Render/Heroku/Railway:
 
 ### ✅ **DO:**
-1. Set `GEMINI_API_KEYS` as **environment variables** (not in code)
+1. Set `GROQ_API_KEYS` as **environment variables** (not in code)
 2. Enable HTTPS (TLS/SSL)
 3. Use environment secrets management
 4. Monitor logs for suspicious activity
@@ -260,7 +260,7 @@ When deploying to Render/Heroku/Railway:
 ```
 Environment Variables:
 ┌────────────────────────────────────────┐
-│ GEMINI_API_KEYS = AIza...,AIza...,... │
+│ GROQ_API_KEYS = gsk_...,gsk_...,gsk_..│
 │ NODE_ENV = production                  │
 └────────────────────────────────────────┘
 ```

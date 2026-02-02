@@ -1,5 +1,5 @@
 // Background Service Worker
-// Handles network requests to the Gemini-powered backend
+// Handles network requests to the Groq-powered backend
 
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
@@ -18,7 +18,7 @@ async function handleEnhanceRequest(request, sendResponse) {
     const { text } = request;
 
     try {
-        // Call Gemini-powered backend
+        // Call Groq-powered backend
         const response = await fetch("https://promptlord-2kjz.onrender.com/enhance", {
             method: "POST",
             headers: {
