@@ -7,8 +7,6 @@ class PromptEnhancer {
             sendButtons: [
                 'button[data-testid="send-button"]', // ChatGPT
                 'button[aria-label="Send message" i]', // Claude, Google AI
-                'button[aria-label="Submit" i]', // Perplexity
-                'button[aria-label="Ask" i]', // Perplexity alternative
                 'button[aria-label="Send" i]', // Generic
                 "textarea + button", // Generic fallback
                 'div[role="textbox"] ~ button', // Generic fallback
@@ -54,7 +52,6 @@ class PromptEnhancer {
      * Injects the Enhance button next to detected send buttons.
      */
     injectButtons() {
-        if (window.location.hostname.includes("perple xity")) return;
         const sendButtons = document.querySelectorAll(this.selectors.sendButtons.join(","));
 
         sendButtons.forEach((sendBtn) => {
