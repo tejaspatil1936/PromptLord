@@ -70,6 +70,8 @@ if (GROQ_API_KEYS.length === 0) {
     console.error("❌ Error: GROQ_API_KEYS is not set in .env file");
     console.log("💡 Add multiple keys like: GROQ_API_KEYS=key1,key2,key3");
     console.log("💡 Get free keys at: https://console.groq.com");
+    console.error("\n🛑 Server cannot start without API keys. Exiting...");
+    process.exit(1); // Fail-fast: Don't start server without API keys
 } else {
     console.log(`✅ Loaded ${GROQ_API_KEYS.length} Groq API key(s)`);
 }
@@ -133,16 +135,26 @@ app.post('/enhance', async (req, res) => {
     const { prompt } = req.body;
     const now = Date.now();
 
-    // Security: Validate input
+    // Input validation: Check if prompt exists and is a string
     if (!prompt || typeof prompt !== 'string') {
-        console.warn(`⚠️  Invalid prompt from ${ip}`);
-        return res.status(400).json({ error: "Valid prompt is required" });
+        return res.status(400).json({ error: "Prompt must be a non-empty string" });
     }
 
-    // Security: Limit prompt length to prevent abuse
-    if (prompt.length > 5000) {
-        console.warn(`⚠️  Prompt too long from ${ip}: ${prompt.length} chars`);
-        return res.status(400).json({ error: "Prompt too long (max 5000 characters)" });
+    // Input validation: Check if prompt is not just whitespace
+    const trimmedPrompt = prompt.trim();
+    if (trimmedPrompt.length === 0) {
+        return res.status(400).json({ error: "Prompt cannot be empty or whitespace only" });
+    }
+
+    // Input validation: Check minimum length (at least 2 characters)
+    if (trimmedPrompt.length < 2) {
+        return res.status(400).json({ error: "Prompt too short (minimum 2 characters)" });
+    }
+
+    // Input validation: Check maximum length
+    if (trimmedPrompt.length > 5000) {
+        console.warn(`⚠️  Rejected long prompt: ${trimmedPrompt.length} chars from ${ip}`);
+        return res.status(400).json({ error: "Prompt too long (max 5,000 characters)" });
     }
 
     // Security: Anti-spam - Minimum time between requests
@@ -187,11 +199,38 @@ app.post('/enhance', async (req, res) => {
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",  // Fastest Groq model (500+ tokens/sec)
                         messages: [{
+                            role: "system",
+                            content: `You are a prompt enhancement specialist. Your ONLY job is to improve prompts, NOT to answer them.
+
+STRICT RULES:
+1. NEVER answer the question or provide the requested information
+2. ONLY return the enhanced version of the original prompt
+3. For generic prompts lacking context, enhance them generically without adding specific assumptions
+4. Preserve the user's original intent and any context references (e.g., "above", "attached", "previous")
+5. Make prompts clearer, more specific, and better structured
+
+ENHANCEMENT FRAMEWORK (Apply where missing):
+Use the four key areas for effective prompts when enhancing:
+• Persona: Who is asking or who should respond (e.g., "You are a teacher explaining to students...")
+• Task: What action to take - ALWAYS include a clear verb (e.g., summarize, write, explain, analyze, create)
+• Context: Relevant background, constraints, or details needed
+• Format: Desired output structure (e.g., bullet points, paragraph, table, step-by-step)
+
+BEST PRACTICES:
+- Use natural, conversational language
+- Be concise but specific - aim for clarity without unnecessary complexity
+- If the original prompt is complex, suggest breaking it into multiple focused prompts
+- Avoid jargon unless it's relevant to the domain
+- Strengthen vague prompts by adding specificity
+- For prompts like "explain the above" or "summarize the attached", keep these references intact and add structure around them
+
+Return ONLY the enhanced prompt, nothing else.`
+                        }, {
                             role: "user",
-                            content: `Transform this rough prompt into a clear, comprehensive, well-structured prompt. Return ONLY the improved prompt.\n\nOriginal: ${prompt}\n\nEnhanced:`
+                            content: `Original prompt:\n"""\n${trimmedPrompt}\n"""\n\nEnhanced prompt:`
                         }],
                         temperature: 0.3,
-                        max_tokens: 2048
+                        max_tokens: 512  // Optimized for prompt enhancements (reduced from 2048)
                     })
                 }
             );
