@@ -6,6 +6,9 @@
     "scripts": {
         "start": "node index.js"
     },
+    "overrides": {
+        "qs": "^6.15.0"
+    },
     "dependencies": {
         "body-parser": "^1.20.2",
         "cors": "^2.8.5",

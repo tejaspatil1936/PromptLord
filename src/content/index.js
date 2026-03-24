@@ -361,7 +361,9 @@ class PromptEnhancer {
         // Strategy 3: Advanced Event Simulation (Fallback for ContentEditable)
 
         if (input.id === "prompt-textarea") { // ChatGPT
-            input.innerHTML = `<p>${text}</p>`;
+            const paragraph = document.createElement("p");
+            paragraph.textContent = text;
+            input.replaceChildren(paragraph);
         } else {
             input.innerText = text;
         }

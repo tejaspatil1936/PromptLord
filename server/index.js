@@ -7,6 +7,9 @@ const fetch = require('node-fetch');
 const app = express();
 const PORT = 3000;
 
+// Security: Avoid qs-based nested query parsing.
+app.set('query parser', 'simple');
+
 // Security: Strict CORS - Only allow Chrome Extension origins
 const allowedOrigins = [
     'chrome-extension://*',
