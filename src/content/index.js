@@ -55,11 +55,20 @@ class PromptEnhancer {
         const sendButtons = document.querySelectorAll(this.selectors.sendButtons.join(","));
 
         sendButtons.forEach((sendBtn) => {
+            // Skip if this send button already has an enhance button
+            if (sendBtn.dataset.promptlordEnhanced === "true") return;
+
             const parent = sendBtn.parentElement;
-            if (!parent || parent.querySelector(".ai-enhance-button")) return;
+            if (!parent) return;
+
+            // Check if parent or nearby siblings already have enhance button
+            if (parent.querySelector(".ai-enhance-button")) return;
 
             const enhanceBtn = this.createButton();
             parent.insertBefore(enhanceBtn, sendBtn);
+
+            // Mark this send button as already enhanced
+            sendBtn.dataset.promptlordEnhanced = "true";
         });
     }
 

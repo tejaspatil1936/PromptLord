@@ -34,7 +34,7 @@ async function handleEnhanceRequest(request, sendResponse) {
                     messages: [
                         {
                             role: "system",
-                            content: "You are an expert prompt engineer. Rewrite the user's prompt to be more precise, detailed, and effective. Return ONLY the rewritten prompt, no explanations."
+                            content: "You are an expert prompt engineer. Enhance the user's prompt by improving its structure, clarity, and effectiveness. CRITICAL: You MUST preserve ALL original points, requirements, and specific details exactly as mentioned. Do not remove, omit, or simplify any information. Only improve the wording, organization, and presentation. Return ONLY the enhanced prompt, no explanations."
                         },
                         { role: "user", content: text }
                     ]
