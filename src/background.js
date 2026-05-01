@@ -1,11 +1,5 @@
 // Background Service Worker
-// Handles network requests to the Groq-powered backend
-
-chrome.runtime.onInstalled.addListener((details) => {
-    if (details.reason === 'install') {
-        chrome.tabs.create({ url: 'src/pages/welcome.html' });
-    }
-});
+// Handles network requests to bypass CORS/Mixed Content restrictions
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "enhance_prompt") {
@@ -15,52 +9,67 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleEnhanceRequest(request, sendResponse) {
-    const { text } = request;
+    const { text, mode, apiKey } = request;
 
     try {
-        // Call Groq-powered backend
-        const response = await fetch("https://promptlord-2kjz.onrender.com/enhance", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ prompt: text })
-        });
+        let response;
+        let data;
 
-        if (response.status === 402 || response.status === 403) {
-            sendResponse({ success: false, error: "FREE_LIMIT_REACHED" });
-            return;
+        if (mode === "BYOK") {
+            // --- BYOK MODE (Direct to OpenAI) ---
+            response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are an expert prompt engineer. Rewrite the user's prompt to be more precise, detailed, and effective. Return ONLY the rewritten prompt, no explanations."
+                        },
+                        { role: "user", content: text }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`OpenAI API Error: ${response.status} - ${errText}`);
+            }
+
+            data = await response.json();
+            sendResponse({ success: true, enhancedText: data.choices[0].message.content });
+
+        } else {
+            // --- FREE TRIAL MODE (Local Backend) ---
+            // Note: Background scripts can make HTTP requests to localhost!
+            response = await fetch("http://localhost:3000/enhance", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ prompt: text })
+            });
+
+            if (response.status === 402 || response.status === 403) {
+                sendResponse({ success: false, error: "FREE_LIMIT_REACHED" });
+                return;
+            }
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Backend Error: ${response.status} - ${errText}`);
+            }
+
+            data = await response.json();
+            sendResponse({ success: true, enhancedText: data.enhancedPrompt });
         }
-
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`Backend Error: ${response.status} - ${errText}`);
-        }
-
-        const data = await response.json();
-        sendResponse({ success: true, enhancedText: data.enhancedPrompt });
 
     } catch (error) {
         console.error("Background Script Error:", error);
         sendResponse({ success: false, error: error.message });
     }
 }
-
-// Keep-alive ping to prevent Render free tier from sleeping
-// Pings every 14 minutes (under the 15-minute sleep threshold)
-const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
-
-function keepAlive() {
-    fetch("https://promptlord-2kjz.onrender.com/enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: "ping" })
-    })
-        .then(() => console.log('Keep-alive ping sent'))
-        .catch(() => { }); // Ignore errors
-}
-
-// Start keep-alive pings
-setInterval(keepAlive, KEEP_ALIVE_INTERVAL);
-// Send initial ping after 1 minute to warm up the server
-setTimeout(keepAlive, 60000);

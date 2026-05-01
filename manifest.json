@@ -3,7 +3,20 @@
   "name": "PromptLord - AI Prompt Enhancer",
   "version": "1.0.0",
   "description": "Enhance your AI prompts with a single click.",
-  "permissions": [],
+  "permissions": [
+    "storage"
+  ],
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://api.openai.com/*"
+  ],
   "content_scripts": [
     {
       "matches": [
