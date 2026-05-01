@@ -1,6 +1,12 @@
 // Background Service Worker
 // Handles network requests to bypass CORS/Mixed Content restrictions
 
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+        chrome.tabs.create({ url: 'src/pages/welcome.html' });
+    }
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "enhance_prompt") {
         handleEnhanceRequest(request, sendResponse);
@@ -44,9 +50,8 @@ async function handleEnhanceRequest(request, sendResponse) {
             sendResponse({ success: true, enhancedText: data.choices[0].message.content });
 
         } else {
-            // --- FREE TRIAL MODE (Local Backend) ---
-            // Note: Background scripts can make HTTP requests to localhost!
-            response = await fetch("http://localhost:3000/enhance", {
+            // --- FREE TRIAL MODE (Production Backend) ---
+            response = await fetch("https://promptlord.onrender.com/enhance", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
