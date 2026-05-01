@@ -50,7 +50,6 @@ app.post('/enhance', async (req, res) => {
 
     // Increment count
     ipCounts[ip] = currentCount + 1;
-    console.log(`[${ip}] Request ${ipCounts[ip]}/${FREE_LIMIT}`);
 
     try {
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -64,7 +63,7 @@ app.post('/enhance', async (req, res) => {
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert prompt engineer. Enhance the user's prompt by improving its structure, clarity, and effectiveness. CRITICAL: You MUST preserve ALL original points, requirements, and specific details exactly as mentioned. Do not remove, omit, or simplify any information. Only improve the wording, organization, and presentation. Return ONLY the enhanced prompt, no explanations."
+                        content: "Improve the following user prompt by making it clearer, more structured, and more effective. Return ONLY the improved prompt."
                     },
                     { role: "user", content: prompt }
                 ]
