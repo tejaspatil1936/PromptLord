@@ -129,12 +129,14 @@ class PromptEnhancer {
                 const remaining = this.maxFreeUsage - usage;
                 btn.textContent = `Enhance (${remaining} left)`;
                 btn.title = `${remaining} free enhancements remaining. Add API key for unlimited use.`;
-            } else if (isFree) {
+            } else if (isFree && usage >= this.maxFreeUsage) {
                 btn.textContent = "Enhance";
                 btn.title = "Free trial limit reached. Add your OpenAI API key for unlimited use.";
+                btn.style.opacity = "0.7";
             } else {
                 btn.textContent = "Enhance";
                 btn.title = "Enhance your prompt with AI";
+                btn.style.opacity = "1";
             }
         } catch (err) {
             btn.textContent = "Enhance";
@@ -173,32 +175,53 @@ class PromptEnhancer {
         }
 
         this.lastClickTime = now;
-        const originalText = btn.textContent;
 
-        // Check if using free trial and show intelligent loading message
-        chrome.storage.local.get(['apiKey'], async (result) => {
+        // CRITICAL: Check limit BEFORE attempting enhancement
+        try {
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['apiKey', 'freeTrialUsage'], resolve);
+            });
+
             const isFree = !result.apiKey;
+            const usage = result.freeTrialUsage || 0;
 
+            // Block if limit reached
+            if (isFree && usage >= this.maxFreeUsage) {
+                btn.textContent = "Limit reached";
+                setTimeout(() => {
+                    if (confirm('Free trial limit reached (10/10 used). Add your OpenAI API key in settings for unlimited use.\n\nOpen settings now?')) {
+                        chrome.runtime.sendMessage({ action: 'open_options' });
+                    }
+                    btn.disabled = false;
+                    btn.style.cursor = "";
+                    this.updateButtonText(btn);
+                }, 100);
+                return;
+            }
+
+            // Show appropriate loading message
             if (isFree && this.isColdStart) {
                 this.setButtonState(btn, "Waking server...", true, "wait");
                 this.isColdStart = false;
             } else {
                 this.setButtonState(btn, "Enhancing...", true, "wait");
             }
-        });
-
-        this.setButtonState(btn, "Enhancing...", true, "wait");
+        } catch (err) {
+            this.setButtonState(btn, "Enhancing...", true, "wait");
+        }
 
         try {
             await this.enhancePrompt(btn);
 
             // Track usage for free trial users
-            chrome.storage.local.get(['apiKey'], async (result) => {
-                if (!result.apiKey) {
-                    await this.incrementUsage();
-                    await this.updateButtonText(btn);
-                }
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['apiKey'], resolve);
             });
+
+            if (!result.apiKey) {
+                await this.incrementUsage();
+                await this.updateButtonText(btn);
+            }
         } catch (err) {
             console.error("PromptLord: Enhance failed", err);
 
@@ -209,19 +232,25 @@ class PromptEnhancer {
                     if (confirm('Free trial limit reached (10/10 used). Add your OpenAI API key in settings for unlimited use.\n\nOpen settings now?')) {
                         chrome.runtime.sendMessage({ action: 'open_options' });
                     }
-                    this.setButtonState(btn, "Enhance", false, "");
+                    btn.disabled = false;
+                    btn.style.cursor = "";
+                    this.updateButtonText(btn);
                 }, 100);
             } else {
                 btn.textContent = "Error";
                 setTimeout(() => {
-                    this.setButtonState(btn, "Enhance", false, "");
+                    btn.disabled = false;
+                    btn.style.cursor = "";
+                    this.updateButtonText(btn);
                 }, 2000);
             }
             return;
         }
 
         setTimeout(() => {
-            this.setButtonState(btn, "Enhance", false, "");
+            btn.disabled = false;
+            btn.style.cursor = "";
+            this.updateButtonText(btn);
         }, 1000);
     }
 
