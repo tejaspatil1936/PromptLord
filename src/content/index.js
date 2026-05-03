@@ -79,24 +79,38 @@ class PromptEnhancer {
      * Injects the Enhance button next to detected send buttons.
      */
     injectButtons() {
-        if (window.location.hostname.includes("perplexity")) return;
+        if (window.location.hostname.includes("perple xity")) return;
         const sendButtons = document.querySelectorAll(this.selectors.sendButtons.join(","));
 
         sendButtons.forEach((sendBtn) => {
-            // Skip if this send button already has an enhance button
-            if (sendBtn.dataset.promptlordEnhanced === "true") return;
-
             const parent = sendBtn.parentElement;
             if (!parent) return;
 
-            // Check if parent or nearby siblings already have enhance button
-            if (parent.querySelector(".ai-enhance-button")) return;
+            const existingBtn = parent.querySelector(".ai-enhance-button");
+            const input = this.findInput(sendBtn);
+            const hasText = input && this.readInputText(input).trim().length > 0;
+            
+            if (existingBtn) {
+                existingBtn.style.display = hasText ? "inline-flex" : "none";
+                return;
+            }
+            
+            if (sendBtn.offsetParent === null || sendBtn.offsetWidth === 0) return;
+            if (sendBtn.dataset.promptlordEnhanced === "true") return;
 
             const enhanceBtn = this.createButton();
+            enhanceBtn.style.display = hasText ? "inline-flex" : "none";
             parent.insertBefore(enhanceBtn, sendBtn);
-
-            // Mark this send button as already enhanced
             sendBtn.dataset.promptlordEnhanced = "true";
+            
+            if (input) {
+                const updateVisibility = () => {
+                    const text = this.readInputText(input).trim();
+                    enhanceBtn.style.display = text.length > 0 ? "inline-flex" : "none";
+                };
+                input.addEventListener("input", updateVisibility);
+                input.addEventListener("keyup", updateVisibility);
+            }
         });
     }
 

@@ -23,6 +23,11 @@
   user-select: none;
   height: auto;
   width: auto;
+  min-width: fit-content;
+  flex-shrink: 0; /* Prevent button from shrinking */
+  white-space: nowrap; /* Prevent text wrapping */
+  position: relative; /* Ensure proper stacking */
+  z-index: 1; /* Stay below modals but above normal content */
 }
 
 .ai-enhance-button:hover {
