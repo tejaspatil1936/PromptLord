@@ -32,9 +32,9 @@
                              │ API Calls
                              ▼
           ┌─────────────────────────────────────┐
-          │      Groq API (Free Tier)           │
-          │   • 30 requests/min per key         │
-          │   • 500+ tokens/sec throughput      │
+          │   Google Gemini API (Free Tier)     │
+          │   • 15 requests/min per key         │
+          │   • 1,500 requests/day per key      │
           └─────────────────────────────────────┘
 ```
 
@@ -92,33 +92,33 @@ Request 10 →  [Key #1] → ✅ Success (200)  ← Key #1 back online
 
 ### Single Key (Basic)
 ```env
-GROQ_API_KEYS=gsk_abc123...
+GEMINI_API_KEYS=AIzaSyD...
 ```
-**Capacity:** 30 req/min, Very generous daily limit
+**Capacity:** 15 req/min, 1,500 req/day
 
 ---
 
 ### 3 Keys (Recommended)
 ```env
-GROQ_API_KEYS=gsk_abc123...,gsk_def456...,gsk_ghi789...
+GEMINI_API_KEYS=AIzaSyD...,AIzaSyE...,AIzaSyF...
 ```
-**Capacity:** 90 req/min, Very generous daily limit
+**Capacity:** 45 req/min, 4,500 req/day
 
 ---
 
 ### 5 Keys (High Traffic)
 ```env
-GROQ_API_KEYS=gsk_key1...,gsk_key2...,gsk_key3...,gsk_key4...,gsk_key5...
+GEMINI_API_KEYS=AIzaSyD...,AIzaSyE...,AIzaSyF...,AIzaSyG...,AIzaSyH...
 ```
-**Capacity:** 150 req/min, Very generous daily limit
+**Capacity:** 75 req/min, 7,500 req/day
 
 ---
 
 ### 10 Keys (Production Scale)
 ```env
-GROQ_API_KEYS=key1,key2,key3,key4,key5,key6,key7,key8,key9,key10
+GEMINI_API_KEYS=key1,key2,key3,key4,key5,key6,key7,key8,key9,key10
 ```
-**Capacity:** 300 req/min, Very generous daily limit
+**Capacity:** 150 req/min, 15,000 req/day
 
 ## Benefits
 
@@ -150,10 +150,10 @@ GROQ_API_KEYS=key1,key2,key3,key4,key5,key6,key7,key8,key9,key10
 
 ### Console Logs
 ```
-✅ Loaded 3 Groq API key(s)
+✅ Loaded 3 Gemini API key(s)
 ✅ Request successful with API Key #2
 ⚠️  API Key #1 marked as failed (fail count: 1)
-❌ Groq API Error (Key #3): Rate limit exceeded
+❌ Gemini API Error (Key #3): Rate limit exceeded
 ```
 
 ## Scaling Strategy
@@ -161,20 +161,20 @@ GROQ_API_KEYS=key1,key2,key3,key4,key5,key6,key7,key8,key9,key10
 ```
 Users/Hour  │  Keys Needed  │  Total Capacity
 ────────────┼───────────────┼─────────────────
-< 100       │      1        │  30 req/min
-100-500     │      3        │  90 req/min
-500-1000    │      5        │ 150 req/min
-1000-2000   │     10        │ 300 req/min
-2000+       │     15+       │ 450+ req/min
+< 100       │      1        │  15 req/min
+100-500     │      3        │  45 req/min
+500-1000    │      5        │  75 req/min
+1000-2000   │     10        │ 150 req/min
+2000+       │     15+       │ 225+ req/min
 ```
 
 ## Cost Analysis
 
-| Solution | Cost/Month | Speed | Requests/Min |
-|----------|-----------|-------|---------------|
-| OpenAI GPT-4 | $30+ | Medium | Limited |
-| **Groq API (1 key)** | **$0** | **Very Fast (500+ tok/s)** | **30** |
-| **Groq API (3 keys)** | **$0** | **Very Fast (500+ tok/s)** | **90** |
-| **Groq API (10 keys)** | **$0** | **Very Fast (500+ tok/s)** | **300** |
+| Solution | Cost/Month | Requests/Day | Requests/Min |
+|----------|-----------|--------------|--------------|
+| OpenAI GPT-4 | $30+ | ~1,000 | Limited |
+| **Gemini (1 key)** | **$0** | **1,500** | **15** |
+| **Gemini (3 keys)** | **$0** | **4,500** | **45** |
+| **Gemini (10 keys)** | **$0** | **15,000** | **150** |
 
-🎉 **Winner:** Multiple Groq keys = **Maximum capacity at $0 cost!**
+🎉 **Winner:** Multiple Gemini keys = **Maximum capacity at $0 cost!**
