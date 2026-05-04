@@ -6,16 +6,11 @@
   "permissions": [
     "storage"
   ],
-  "options_ui": {
-    "page": "src/options/options.html",
-    "open_in_tab": true
-  },
   "background": {
     "service_worker": "src/background.js"
   },
   "host_permissions": [
-    "https://promptlord.onrender.com/*",
-    "https://api.openai.com/*"
+    "https://promptlord-2kjz.onrender.com/*"
   ],
   "content_scripts": [
     {
