@@ -181,12 +181,24 @@ app.post('/enhance', async (req, res) => {
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: `Improve the following user prompt by making it clearer, more structured, and more effective. Return ONLY the improved prompt without any explanations or meta-commentary.\n\nPrompt to improve:\n${prompt}`
+                                text: `You are a prompt enhancement AI. Your job is to transform rough, incomplete prompts into clear, comprehensive, and well-structured prompts.
+
+Rules:
+1. Return ONLY the improved prompt - no explanations, no meta-commentary
+2. Make the prompt clear, specific, and actionable
+3. Preserve the user's original intent
+4. Add necessary structure and detail
+5. Complete the entire enhanced prompt - do not cut it short
+
+Original prompt to improve:
+${prompt}
+
+Enhanced prompt:`
                             }]
                         }],
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 1000
+                            maxOutputTokens: 2048
                         }
                     })
                 }
