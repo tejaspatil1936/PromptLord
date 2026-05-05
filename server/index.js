@@ -279,6 +279,26 @@ setInterval(() => {
     });
 }, 5 * 60 * 1000);
 
+// Keep-alive: Prevent Render free tier from sleeping (pings every 14 minutes)
+// Render free tier sleeps after 15 min of inactivity, causing 30-50s cold start delay
+const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+const RENDER_URL = process.env.RENDER_URL; // Set this in Render env vars
+
+if (RENDER_URL) {
+    setInterval(async () => {
+        try {
+            console.log('🔄 Keep-alive ping...');
+            await fetch(`${RENDER_URL}/health`);
+            console.log('✅ Keep-alive successful');
+        } catch (error) {
+            console.warn('⚠️  Keep-alive failed:', error.message);
+        }
+    }, KEEP_ALIVE_INTERVAL);
+    console.log('🔔 Keep-alive enabled (pings every 14 minutes)');
+} else {
+    console.log('💤 Keep-alive disabled (set RENDER_URL env var to enable)');
+}
+
 app.listen(PORT, () => {
     console.log(`🚀 PromptLord Backend running on http://localhost:${PORT}`);
     console.log(`⚡ Using ${GROQ_API_KEYS.length} Groq API key(s) with round-robin rotation`);
