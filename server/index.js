@@ -16,8 +16,11 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps, curl, Postman)
-        if (!origin) return callback(null, true);
+        // SECURITY: Require origin header (blocks curl/Postman exploitation)
+        if (!origin) {
+            console.warn(`⚠️  Blocked request with no origin (potential curl/API client)`);
+            return callback(new Error('Origin header required'));
+        }
 
         // Check if origin matches allowed patterns
         const isAllowed = allowedOrigins.some(allowed => {
@@ -47,7 +50,7 @@ app.use(bodyParser.json({ limit: '10kb' })); // Limit payload size to prevent ab
 // Security: Rate limiting per IP with stricter limits
 const ipCounts = {};
 const ipLastRequest = {};
-const FREE_LIMIT = 50; // Reduced from 100 for better security
+const FREE_LIMIT = 100;
 const RATE_WINDOW_MS = 60000; // 1 minute
 const MIN_REQUEST_INTERVAL_MS = 2000; // Minimum 2 seconds between requests
 
