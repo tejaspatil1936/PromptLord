@@ -173,9 +173,8 @@ Users/Hour  │  Keys Needed  │  Total Capacity
 | Solution | Cost/Month | Speed | Requests/Min |
 |----------|-----------|-------|---------------|
 | OpenAI GPT-4 | $30+ | Medium | Limited |
-| Gemini API | **$0** | Slow (50 tok/s) | 15/key |
 | **Groq API (1 key)** | **$0** | **Very Fast (500+ tok/s)** | **30** |
 | **Groq API (3 keys)** | **$0** | **Very Fast (500+ tok/s)** | **90** |
 | **Groq API (10 keys)** | **$0** | **Very Fast (500+ tok/s)** | **300** |
 
-🎉 **Winner:** Multiple Groq keys = **10x faster + Maximum capacity at $0 cost!**
+🎉 **Winner:** Multiple Groq keys = **Maximum capacity at $0 cost!**

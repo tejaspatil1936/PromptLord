@@ -6,7 +6,7 @@ class PromptEnhancer {
         this.selectors = {
             sendButtons: [
                 'button[data-testid="send-button"]', // ChatGPT
-                'button[aria-label="Send message" i]', // Claude, Gemini
+                'button[aria-label="Send message" i]', // Claude, Google AI
                 'button[aria-label="Submit" i]', // Perplexity
                 'button[aria-label="Ask" i]', // Perplexity alternative
                 'button[aria-label="Send" i]', // Generic
@@ -101,7 +101,7 @@ class PromptEnhancer {
 
         // Set button text
         btn.textContent = "Enhance";
-        btn.title = "Enhance your prompt with AI (Powered by Gemini)";
+        btn.title = "Enhance your prompt ";
 
         return btn;
     }
@@ -388,7 +388,7 @@ class PromptEnhancer {
                 return;
             }
 
-            // Send to Gemini backend
+            // Send to backend
             chrome.runtime.sendMessage({
                 action: "enhance_prompt",
                 text: text

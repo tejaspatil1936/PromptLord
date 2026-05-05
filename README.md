@@ -2,8 +2,8 @@
 
 A browser extension that transforms basic prompts into detailed, well-structured prompts for better AI responses.
 
-⚡ **Now 10x Faster with Groq API!** ⚡  
-Response time: **0.5-1 seconds** (previously 3-5 seconds with Gemini)
+⚡ **Lightning Fast with Groq API!** ⚡  
+Response time: **0.5-1 seconds**
 
 ## Features
 
@@ -11,7 +11,7 @@ Response time: **0.5-1 seconds** (previously 3-5 seconds with Gemini)
 - 🔒 **100% Free**: No cost - uses free Groq API tier
 - 🔐 **Secure**: Server-side API keys, CORS protection, rate limiting
 - 🔄 **Multi-Key Rotation**: Add multiple API keys for higher availability
-- 🎯 **Universal**: Works on ChatGPT, Claude, Gemini, and any text input
+- 🎯 **Universal**: Works on ChatGPT, Claude, Google AI, and any text input
 - 🎨 **Premium UI**: Native-feeling glassmorphism design with dark mode support
 
 ## Quick Setup
@@ -57,9 +57,9 @@ node index.js
 
 ## Performance
 
-- **Groq API**: ~0.5-1 second response time
-- **Previous (Gemini)**: ~3-5 second response time
-- **10x Speed Improvement!** 🚀
+- **Response Time**: ~0.5-1 seconds
+- **Throughput**: 500+ tokens/second
+- **Lightning Fast!** 🚀
 
 ## File Structure
 

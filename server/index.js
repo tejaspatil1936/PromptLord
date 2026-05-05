@@ -55,7 +55,6 @@ const RATE_WINDOW_MS = 60000; // 1 minute
 const MIN_REQUEST_INTERVAL_MS = 2000; // Minimum 2 seconds between requests
 
 // Multiple Groq API Keys (supports comma-separated keys)
-// Groq is 10x faster than Gemini (500 tokens/sec vs 50 tokens/sec)
 const GROQ_API_KEYS = process.env.GROQ_API_KEYS
     ? process.env.GROQ_API_KEYS.split(',').map(key => key.trim()).filter(key => key.length > 0)
     : [];

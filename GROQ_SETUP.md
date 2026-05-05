@@ -2,11 +2,10 @@
 
 ## Why Groq?
 
-**Groq is 10x faster than Gemini:**
+**Lightning-fast AI responses:**
 - **Groq**: 500+ tokens/second (~0.5-1s response time)
-- **Gemini**: 50 tokens/second (~3-5s response time)
-
-Both are **100% FREE** with generous limits!
+- **100% FREE** with generous limits!
+- Multiple key support for higher availability
 
 ## Get FREE Groq API Keys
 
