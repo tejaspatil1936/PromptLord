@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PromptLord - AI Prompt Enhancer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Enhance your AI prompts with a single click.",
   "permissions": [
     "storage"
@@ -17,9 +17,7 @@
       "matches": [
         "https://chatgpt.com/*",
         "https://claude.ai/*",
-        "https://gemini.google.com/*",
-        "https://www.perplexity.ai/*",
-        "https://grok.com/*"
+        "https://gemini.google.com/*"
       ],
       "js": [
         "src/content/index.js"
