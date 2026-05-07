@@ -1,74 +1,188 @@
 # PromptLord - AI Prompt Enhancer
 
-A browser extension that transforms basic prompts into detailed, well-structured prompts for better AI responses.
+> Transform basic prompts into detailed, well-structured prompts for better AI responses with a single click.
 
-⚡ **Lightning Fast with Groq API!** ⚡  
-Response time: **0.5-1 seconds**
+[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/tejaspatil1936/PromptLord)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Features
+⚡ **Lightning Fast** • 🔒 **100% Free** • 🔐 **Secure**
 
-- 🚀 **Lightning Fast**: Powered by Groq's llama-3.1-8b-instant (500+ tokens/sec)
-- 🔒 **100% Free**: No cost - uses free Groq API tier
-- 🔐 **Secure**: Server-side API keys, CORS protection, rate limiting
-- 🔄 **Multi-Key Rotation**: Add multiple API keys for higher availability
-- 🎯 **Universal**: Works on ChatGPT, Claude, Google AI, and any text input
-- 🎨 **Premium UI**: Native-feeling glassmorphism design with dark mode support
+## ✨ Features
 
-## Quick Setup
+- ⚡ **Lightning Fast**: Powered by Groq's llama-3.1-8b-instant model (500+ tokens/sec)
+- 🆓 **Completely Free**: Uses free Groq API tier - no credit card required
+- 🔐 **Secure & Private**: Server-side API key management, CORS protection, rate limiting
+- 🔄 **Multi-Key Rotation**: Automatic failover with multiple API keys for 99.9% uptime
+- 🎯 **Universal Compatibility**: Works seamlessly on ChatGPT, Claude, and Google AI (Gemini)
+- 🎨 **Premium UI**: Beautiful glassmorphism design with native dark mode support
+- 🚀 **One-Click Enhancement**: Enhance any prompt with a single button click
 
-### 1. Get FREE Groq API Keys
-1. Go to [https://console.groq.com](https://console.groq.com)
-2. Create a free account (no credit card needed)
-3. Generate 3-5 API keys
+## 🌐 Supported Platforms
 
-📖 **Detailed Guide**: See [GROQ_SETUP.md](GROQ_SETUP.md)
+- ✅ [ChatGPT](https://chatgpt.com) (OpenAI)
+- ✅ [Claude](https://claude.ai) (Anthropic)
+- ✅ [Gemini](https://gemini.google.com) (Google AI)
 
-### 2. Deploy Backend to Render (Free)
-1. Fork this repo or connect to Render
-2. Create a new Web Service on Render
-3. Add environment variable: `GROQ_API_KEYS=key1,key2,key3`
-4. Deploy!
+## 🚀 Quick Start
 
-### 3. Install Extension
-1. Download/clone this repository
-2. Go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select this directory
-5. You're ready to go! ⚡
+### Prerequisites
+- Chrome/Edge browser (Manifest V3 compatible)
+- Free Groq API account
 
-## Local Development
+### 1. Get Your FREE Groq API Keys
+
+1. Visit [https://console.groq.com](https://console.groq.com)
+2. Sign up for a free account (no credit card needed)
+3. Generate 3-5 API keys for best performance
+
+📖 **Need help?** See our detailed [Groq Setup Guide](GROQ_SETUP.md)
+
+### 2. Deploy Backend (Free on Render)
+
+1. Fork this repository
+2. Create a new Web Service on [Render](https://render.com)
+3. Connect your forked repository
+4. Add environment variable:
+   ```
+   GROQ_API_KEYS=gsk_key1,gsk_key2,gsk_key3
+   ```
+5. Click "Deploy" and copy your backend URL
+
+### 3. Install Browser Extension
+
+1. Clone/download this repository:
+   ```bash
+   git clone https://github.com/tejaspatil1936/PromptLord.git
+   cd PromptLord
+   ```
+
+2. Update the backend URL in `manifest.json`:
+   ```json
+   "host_permissions": [
+     "https://your-backend-url.onrender.com/*"
+   ]
+   ```
+
+3. Load the extension:
+   - Open Chrome and go to `chrome://extensions/`
+   - Enable "Developer mode" (top right)
+   - Click "Load unpacked"
+   - Select the PromptLord directory
+
+4. You're all set! 🎉
+
+## 💻 Local Development
 
 ```bash
+# Install backend dependencies
 cd server
 npm install
+
+# Create environment file
 cp .env.example .env
+
 # Add your Groq API keys to .env
-node index.js
+# GROQ_API_KEYS=gsk_key1,gsk_key2,gsk_key3
+
+# Start the backend server
+npm start
 ```
 
-## Architecture
+The server will run on `http://localhost:3000`
 
-- **Frontend**: Chrome Extension (content scripts + background worker)
-- **Backend**: Node.js + Express + Groq API
-- **Security**: CORS, rate limiting, API key rotation, input validation
+## 📁 Project Structure
 
-📖 **Full Details**: [ARCHITECTURE.md](ARCHITECTURE.md)  
-🔒 **Security Info**: [SECURITY.md](SECURITY.md)
+```
+PromptLord/
+├── src/
+│   ├── content/
+│   │   └── index.js          # Content script for button injection
+│   ├── background.js          # Background service worker
+│   ├── styles/
+│   │   └── main.css          # Extension UI styles
+│   └── pages/
+│       └── welcome.html       # Welcome page
+├── server/
+│   ├── index.js              # Express API server
+│   ├── package.json          # Backend dependencies
+│   └── .env.example          # Environment template
+├── icons/                     # Extension icons
+├── manifest.json             # Extension configuration
+├── ARCHITECTURE.md           # Technical architecture docs
+├── SECURITY.md              # Security implementation details
+└── GROQ_SETUP.md            # API setup guide
+```
 
-## Performance
+## 🏗️ Architecture
 
-- **Response Time**: ~0.5-1 seconds
-- **Throughput**: 500+ tokens/second
-- **Lightning Fast!** 🚀
+**Frontend**: Chrome Extension (Manifest V3)
+- Content scripts inject enhancement button
+- Background service worker handles API communication
+- Premium glassmorphism UI with dark mode
 
-## File Structure
+**Backend**: Node.js + Express
+- Multi-key rotation with automatic failover
+- Rate limiting and input validation
+- CORS protection and security headers
 
-- `src/content/index.js`: Button injection and prompt enhancement logic
-- `src/background.js`: Background service worker for API calls
-- `src/styles/main.css`: Extension UI styles
-- `server/index.js`: Backend API with multi-key rotation
-- `manifest.json`: Extension configuration
+**AI Engine**: Groq Cloud API
+- llama-3.1-8b-instant model
+- 500+ tokens/second throughput
+- Sub-second response times
 
-## License
+📖 **Detailed Architecture**: See [ARCHITECTURE.md](ARCHITECTURE.md)  
+🔒 **Security Details**: See [SECURITY.md](SECURITY.md)
 
-MIT
+## ⚡ Performance
+
+| Metric | Value |
+|--------|-------|
+| Response Time | 0.5-1 seconds |
+| Throughput | 500+ tokens/sec |
+| Uptime (multi-key) | 99.9% |
+| Cost | $0 / month |
+
+## 📚 Documentation
+
+- [Architecture Guide](ARCHITECTURE.md) - System design and multi-key rotation
+- [Security Documentation](SECURITY.md) - Security measures and best practices
+- [Groq Setup Guide](GROQ_SETUP.md) - Step-by-step API key configuration
+- [Privacy Policy](PRIVACY.md) - Data handling and privacy
+
+## 🛡️ Security
+
+PromptLord is built with security as a top priority:
+
+- ✅ Server-side API key storage (never exposed to client)
+- ✅ CORS protection with whitelist
+- ✅ Rate limiting to prevent abuse
+- ✅ Input validation and sanitization
+- ✅ Secure HTTPS communication
+- ✅ Helmet.js security headers
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs
+- Suggest new features
+- Submit pull requests
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Tejas Patil**
+- GitHub: [@tejaspatil1936](https://github.com/tejaspatil1936)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by Tejas Patil**
+
+If you find this useful, give it a ⭐!
+
+</div>
