@@ -16,8 +16,8 @@ class PromptEnhancer {
 
         this.observer = null;
         this.lastClickTime = 0;
-        this.isColdStart = true;
         this.init();
+        this.setupKeyboardShortcut();
     }
 
 
@@ -28,6 +28,28 @@ class PromptEnhancer {
     init() {
         this.injectButtons();
         this.startObserver();
+    }
+
+    /**
+     * Sets up keyboard shortcut (Ctrl+Shift+E) to trigger enhancement.
+     */
+    setupKeyboardShortcut() {
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Shift+E (or Cmd+Shift+E on Mac)
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'E') {
+                e.preventDefault(); // Prevent default browser behavior
+
+                // Find visible enhance button
+                const enhanceBtn = document.querySelector('.ai-enhance-button[style*="display: inline-flex"], .ai-enhance-button:not([style*="display: none"])');
+
+                if (enhanceBtn && !enhanceBtn.disabled) {
+                    console.log('PromptLord: Keyboard shortcut triggered');
+                    enhanceBtn.click();
+                } else {
+                    console.log('PromptLord: No active enhance button found');
+                }
+            }
+        });
     }
 
     /**
@@ -98,7 +120,7 @@ class PromptEnhancer {
 
         // Set button text
         btn.textContent = "Enhance";
-        btn.title = "Enhance your prompt ";
+        btn.title = "Enhance your prompt (Ctrl+Shift+E)";
 
         return btn;
     }
@@ -139,12 +161,7 @@ class PromptEnhancer {
         this.lastClickTime = now;
 
         // Show loading message
-        if (this.isColdStart) {
-            this.setButtonState(btn, "Waking server...", true, "wait");
-            this.isColdStart = false;
-        } else {
-            this.setButtonState(btn, "Enhancing...", true, "wait");
-        }
+        this.setButtonState(btn, "Enhancing...", true, "wait");
 
         try {
             await this.enhancePrompt(btn);
