@@ -1,5 +1,16 @@
 # Content layer architecture
 
+> ⚠️ **Status: alternative design — not currently wired into the manifest.**
+> The extension that ships today loads the **monolithic** `src/content/index.js`
+> (`manifest.json` → `content_scripts.js`). This document describes a separate,
+> more advanced **capability-based / layered** redesign of the content script that
+> lives in this folder (`bootstrap.js`, `detection.js`, `overlay.js`, …) but is
+> **not loaded at runtime**: the manifest does not inject `bootstrap.js` and has no
+> `web_accessible_resources`, so the dynamic `import()` below cannot resolve. To
+> make this design live, switch `content_scripts.js` to `bootstrap.js` and expose
+> `src/content/*.js` via `web_accessible_resources`. Until then, treat the modules
+> here as an in-progress alternative to `index.js`.
+
 The content script was re-architected from one monolithic `PromptEnhancer` class
 (site-coupled, hardcoded ChatGPT/Claude/Gemini selectors, button inserted into the
 host's layout) into a **capability-based, layered system**. It now recognizes a
@@ -22,7 +33,7 @@ specific site is an optional refinement, not a requirement.
 | `transport.js` | — | The unchanged backend bridge (`chrome.runtime.sendMessage({action:"enhance_prompt"})`). Behavior identical to the old `callApi`. |
 | `util.js` | — | Stateless geometry/DOM helpers. |
 | `main.js` | — | Orchestrator. Wires the layers and owns the enhance UX (cooldown, loading/error/limit states, `Ctrl/Cmd+Shift+E`, undo). Holds no detection/positioning logic itself. |
-| `bootstrap.js` | — | Classic content-script entry (the only file the manifest injects). |
+| `bootstrap.js` | — | Classic content-script entry for this layered design — the single file the manifest *would* inject if this design were wired up (see the status note above). |
 
 ## Key decisions & tradeoffs
 

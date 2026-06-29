@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptLord - Privacy Policy</title>
+    <title>Privacy Policy | PromptLord — AI Prompt Enhancer for ChatGPT, Claude &amp; Gemini</title>
+    <meta name="description" content="PromptLord's privacy policy. The free AI prompt enhancer for ChatGPT, Claude, and Gemini does not collect, store, or share personal data. Prompts are processed transiently and never retained.">
+    <meta name="keywords" content="PromptLord, privacy policy, AI prompt enhancer, ChatGPT extension, Claude, Gemini, data privacy, no tracking">
+    <meta name="author" content="Tejas Patil">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tejaspatil1936.github.io/PromptLord/privacy.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Privacy Policy | PromptLord — AI Prompt Enhancer">
+    <meta property="og:description" content="PromptLord does not collect, store, or share personal data. Prompts are processed transiently and never retained.">
+    <meta property="og:url" content="https://tejaspatil1936.github.io/PromptLord/privacy.html">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Privacy Policy | PromptLord — AI Prompt Enhancer">
+    <meta name="twitter:description" content="PromptLord does not collect, store, or share personal data. Prompts are processed transiently and never retained.">
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -34,7 +51,7 @@
 <body>
     <div class="container">
         <h1>PromptLord - Privacy Policy</h1>
-        <p class="last-updated"><strong>Last Updated:</strong> February 3, 2026</p>
+        <p class="last-updated"><strong>Last Updated:</strong> June 29, 2026</p>
 
         <div class="highlight">
             <strong>Summary:</strong> PromptLord does NOT collect, store, or share any personal data. Your privacy is our top priority.
@@ -68,18 +85,14 @@
         </ol>
 
         <h3>Local Storage</h3>
-        <p>The extension uses Chrome's local storage API solely to:</p>
-        <ul>
-            <li>Store rate limiting timestamps to prevent spam</li>
-            <li>Track request counts for fair usage enforcement</li>
-        </ul>
-        <p>This data:</p>
+        <p>The extension requests Chrome's <code>storage</code> permission to keep local extension preferences and settings on your device. This data:</p>
         <ul>
             <li>Remains on your device only</li>
             <li>Is never transmitted to any server</li>
-            <li>Contains no personal information</li>
-            <li>Is automatically cleared periodically</li>
+            <li>Contains no personal information and no prompt content</li>
+            <li>Can be cleared at any time via Chrome's extension settings</li>
         </ul>
+        <p>Client-side rate limiting (a short cooldown between enhancements) is handled in memory and is not persisted.</p>
 
         <h3>Backend Rate Limiting</h3>
         <p>Our backend server implements IP-based rate limiting to prevent abuse and ensure fair usage. IP addresses are:</p>
@@ -87,7 +100,7 @@
             <li>Not linked to any personal information</li>
             <li>Not stored permanently</li>
             <li>Not shared with third parties</li>
-            <li>Automatically cleared every hour</li>
+            <li>Held only in server memory and purged automatically (rate counters reset each minute; inactive IPs removed within minutes)</li>
         </ul>
 
         <h2>Third-Party Services</h2>
@@ -127,8 +140,8 @@
         <h2>Data Retention</h2>
         <ul>
             <li><strong>Prompt text:</strong> Not retained (processed transiently only)</li>
-            <li><strong>Local storage data:</strong> Cleared automatically after rate limit window expires</li>
-            <li><strong>Server logs:</strong> IP addresses cleared every hour; error logs retained for debugging only</li>
+            <li><strong>Local storage data:</strong> Stays on your device until you clear it via Chrome settings</li>
+            <li><strong>Server memory:</strong> IP rate-limit data purged automatically (counters reset each minute; inactive IPs removed within minutes); error logs retained for debugging only</li>
         </ul>
 
         <h2>Your Rights</h2>

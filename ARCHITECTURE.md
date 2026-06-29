@@ -1,4 +1,9 @@
-# 🔄 Multi-Key Architecture Explained
+# 🔄 Backend Multi-Key Architecture Explained
+
+> **Scope:** This document describes the **backend** (`server/index.js`) — how it rotates across
+> multiple Groq API keys with automatic failover. For the **browser-extension content layer**
+> (how the Enhance button is detected, placed, and wired), see
+> [`src/content/ARCHITECTURE.md`](src/content/ARCHITECTURE.md).
 
 ## System Overview
 
@@ -133,20 +138,27 @@ GROQ_API_KEYS=key1,key2,key3,key4,key5,key6,key7,key8,key9,key10
 ## Monitoring
 
 ### Health Endpoint Response
+
+`GET /health` returns:
+
 ```json
 {
   "status": "healthy",
+  "provider": "Groq",
+  "model": "llama-3.1-8b-instant",
   "totalKeys": 3,
   "activeKeys": 2,
   "failedKeys": [
     {
-      "keyIndex": 1,
+      "keyIndex": 2,
       "failCount": 2,
       "inCooldown": true
     }
   ]
 }
 ```
+
+> `keyIndex` in the response is **1-based** (key #2 above), while `activeKeys = totalKeys − failedKeys.size`.
 
 ### Console Logs
 ```

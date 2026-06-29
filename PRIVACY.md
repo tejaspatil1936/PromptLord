@@ -1,6 +1,6 @@
 # PromptLord - Privacy Policy
 
-**Last Updated:** February 3, 2026
+**Last Updated:** June 29, 2026
 
 ## Introduction
 
@@ -29,15 +29,15 @@ When you click the "Enhance" button:
 4. **No prompts are logged, stored, or retained** after processing
 
 ### Local Storage
-The extension uses Chrome's local storage API solely to:
-- Store rate limiting timestamps to prevent spam
-- Track request counts for fair usage enforcement
-
-This data:
+The extension requests Chrome's `storage` permission to keep local extension
+preferences and settings on your device. This data:
 - Remains on your device only
 - Is never transmitted to any server
-- Contains no personal information
-- Is automatically cleared periodically
+- Contains no personal information and no prompt content
+- Can be cleared at any time via Chrome's extension settings
+
+Rate limiting on the client side (a short cooldown between enhancements) is handled
+in memory and is not persisted.
 
 ### Backend Rate Limiting
 Our backend server implements IP-based rate limiting to:
@@ -48,7 +48,7 @@ IP addresses are used temporarily for rate limiting and are:
 - Not linked to any personal information
 - Not stored permanently
 - Not shared with third parties
-- Automatically cleared every hour
+- Held only in server memory and purged automatically (rate counters reset each minute; inactive IPs are removed within minutes)
 
 ## Third-Party Services
 
@@ -87,8 +87,8 @@ We may update this Privacy Policy occasionally. The "Last Updated" date at the t
 ## Data Retention
 
 - Prompt text: **Not retained** (processed transiently only)
-- Local storage data: Cleared automatically after rate limit window expires
-- Server logs: IP addresses cleared every hour; error logs retained for debugging only
+- Local storage data: Stays on your device until you clear it via Chrome settings
+- Server memory: IP rate-limit data purged automatically (counters reset each minute; inactive IPs removed within minutes); error logs retained for debugging only
 
 ## Your Rights
 

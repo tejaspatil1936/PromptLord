@@ -61,19 +61,18 @@ Your PromptLord backend is now **highly secure** with multiple layers of protect
 
 ### 3. **Rate Limiting (Per IP)** ⏱️
 
-**Limits:**
-- **50 requests per hour** per IP address
-- **Minimum 2 seconds** between requests (anti-spam)
-- Automatic hourly reset
+**Limits (per IP, from `server/index.js`):**
+- **100 requests per minute** per IP address (`FREE_LIMIT = 100`, counters reset every `RATE_WINDOW_MS = 60s`)
+- **Minimum 2 seconds** between requests (anti-spam, `MIN_REQUEST_INTERVAL_MS = 2000`)
 
 **Example:**
 ```
 Request 1 at 10:00:00 ✅ Allowed
-Request 2 at 10:00:01 ❌ Blocked (too fast, must wait 1s)
+Request 2 at 10:00:01 ❌ Blocked (too fast — must wait until 2s have passed)
 Request 3 at 10:00:02 ✅ Allowed
 ...
-Request 51 at 10:30:00 ❌ Blocked (limit reached)
-Request 52 at 11:00:00 ✅ Allowed (hourly reset)
+Request 101 within the same minute ❌ Blocked (per-minute limit reached)
+Request at the next minute       ✅ Allowed (counter reset)
 ```
 
 **Prevents:**
@@ -145,8 +144,8 @@ https://evil.com → ❌ BLOCKED + Warning logged
 ### 7. **Memory Cleanup** 🧹
 
 **Prevents memory leaks:**
-- IP tracking data cleaned every 5 minutes
-- Rate limit counters reset every hour
+- Inactive IP tracking data cleaned every 5 minutes
+- Rate limit counters reset every minute (`RATE_WINDOW_MS`)
 - Removed inactive IPs automatically
 
 ---
@@ -187,7 +186,7 @@ fetch("https://api.groq.com", {
 ```javascript
 // Open browser console and try:
 chrome.storage.local.get(null, (data) => console.log(data));
-// You'll see: apiKey (if user added BYOK), but NOT backend keys ✅
+// You'll see only local extension preferences — NEVER any backend/Groq API keys ✅
 ```
 
 ### Test 2: Inspect Network Requests
@@ -199,14 +198,15 @@ chrome.storage.local.get(null, (data) => console.log(data));
 
 ### Test 3: Try Rate Limit
 ```bash
-# Try sending 55 requests in 1 minute
-for i in {1..55}; do
+# Try sending 105 requests in one minute
+for i in {1..105}; do
   curl -X POST http://localhost:3000/enhance \
     -H "Content-Type: application/json" \
     -d '{"prompt":"test"}' &
 done
 
-# Expected: First 50 succeed, rest blocked ✅
+# Expected: up to 100/min succeed; the rest are blocked (and the 2s
+# minimum interval also throttles rapid-fire requests) ✅
 ```
 
 ### Test 4: Try Wrong Origin
@@ -230,7 +230,7 @@ curl -X POST http://localhost:3000/enhance \
 | Inspect network requests | Keys not in requests | ❌ Impossible |
 | Check localStorage/cookies | Keys not stored client-side | ❌ Impossible |
 | Spam requests | Rate limiting (2s min interval) | ❌ Blocked after 2s |
-| Exhaust quota | IP-based limits (50/hour) | ❌ Blocked after 50 |
+| Exhaust quota | IP-based limits (100/min) | ❌ Blocked after 100/min |
 | Send from other sites | CORS restrictions | ❌ Blocked immediately |
 | Send oversized payloads | 10KB limit | ❌ Blocked |
 | Send huge prompts | 5000 char limit | ❌ Blocked |
