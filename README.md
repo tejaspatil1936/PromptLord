@@ -4,7 +4,7 @@
 
 PromptLord is a free, open-source **Chrome/Edge browser extension** that adds a one-click **"Enhance" button** (and a `Ctrl/Cmd + Shift + E` shortcut) to **ChatGPT, Claude, and Google Gemini**. It rewrites your prompt with clear persona, task, context, and format — powered by **Groq's `llama-3.1-8b-instant`** for sub-second results.
 
-[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/tejaspatil1936/PromptLord)
+[![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)](https://github.com/tejaspatil1936/PromptLord)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-orange.svg)](manifest.json)
 [![Powered by Groq](https://img.shields.io/badge/AI-Groq%20LLM-ff6f00.svg)](https://groq.com)
@@ -171,7 +171,7 @@ PromptLord/
 ├── icons/                     # 16/48/128 px extension icons
 ├── docs/
 │   └── privacy.html          # Hosted privacy policy
-├── manifest.json             # Extension config (Manifest V3, v1.0.2)
+├── manifest.json             # Extension config (Manifest V3, v1.0.3)
 ├── ARCHITECTURE.md           # Backend multi-key rotation architecture
 ├── SECURITY.md               # Backend security model
 ├── GROQ_SETUP.md             # Groq API key setup guide

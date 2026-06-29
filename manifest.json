@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PromptLord - AI Prompt Enhancer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "One-click AI prompt enhancer for ChatGPT, Claude & Gemini. Turn vague prompts into clear, detailed prompts for better AI answers.",
   "permissions": [
     "storage"

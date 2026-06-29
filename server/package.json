@@ -1,6 +1,6 @@
 {
     "name": "promptlord-backend",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "description": "Backend for PromptLord Free Trial",
     "main": "index.js",
     "scripts": {
